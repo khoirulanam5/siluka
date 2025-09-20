@@ -5,18 +5,13 @@ class Karyawan extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->library('session');
-        $this->load->library('form_validation');
+        $this->load->model(['UserModel' => 'user', 'KaryawanModel' => 'karyawan']);
+        ispemilik();
     }
 
     public function index() {
         $data['title'] = 'Data Karyawan';
-        
-        $this->db->select('tb_user.*, tb_karyawan.*');
-        $this->db->from('tb_user');
-        $this->db->join('tb_karyawan', 'tb_user.id_user = tb_karyawan.id_user');
-        $this->db->where('jabatan !=', 'Pasien');
-        $data['karyawan'] = $this->db->get()->result();
+        $data['karyawan'] = $this->karyawan->getAll()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
@@ -24,26 +19,6 @@ class Karyawan extends CI_Controller {
         $this->load->view('pemilik/karyawan/index', $data);
         $this->load->view('template/footer');
     }
-
-    public function generateIdUser() {
-        $unik = 'U';
-        $kode = $this->db->query("SELECT MAX(id_user) LAST_NO FROM tb_user WHERE id_user LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-      }
-
-      public function generateIdKaryawan() {
-        $unik = 'K';
-        $kode = $this->db->query("SELECT MAX(id_karyawan) LAST_NO FROM tb_karyawan WHERE id_karyawan LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-      }
 
     public function add() {
         $data['title'] = 'Tambah Karyawan';
@@ -65,23 +40,23 @@ class Karyawan extends CI_Controller {
         } else {
 
             $user = [
-                'id_user' => $this->generateIdUser(),
+                'id_user' => $this->user->generateIdUser(),
                 'username' => $this->input->post('username'),
                 'password' => $this->input->post('password'),
                 'jabatan' => $this->input->post('jabatan')
             ];
-            $this->db->insert('tb_user', $user);
+            $this->user->addUser($user);
             $id_user = $user['id_user'];
 
             $karyawan = [
-                'id_karyawan' => $this->generateIdKaryawan(),
+                'id_karyawan' => $this->karyawan->generateIdKaryawan(),
                 'id_user' => $id_user,
                 'nm_karyawan' => $this->input->post('nm_karyawan'),
                 'no_hp' => $this->input->post('no_hp'),
                 'email' => $this->input->post('email'),
                 'alamat' => $this->input->post('alamat')
             ];
-            $this->db->insert('tb_karyawan', $karyawan);
+            $this->karyawan->addKaryawan($karyawan);
             
             $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Berhasil', text:'Tambah data karyawan berhasil', icon:'success'})</script>");
 			redirect('pemilik/karyawan');
@@ -90,12 +65,7 @@ class Karyawan extends CI_Controller {
 
     public function edit($id_user) {
         $data['title'] = 'Edit Data Karyawan';
-
-        $this->db->select('tb_user.*, tb_karyawan.*');
-        $this->db->from('tb_user');
-        $this->db->join('tb_karyawan', 'tb_user.id_user = tb_karyawan.id_user');
-        $this->db->where('tb_user.id_user', $id_user);
-        $data['user'] = $this->db->get()->row();
+        $data['user'] = $this->user->getById($id_user)->row();
 
         $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required');
         $this->form_validation->set_rules('no_hp', 'Nomor Hp', 'required|numeric');
@@ -119,8 +89,7 @@ class Karyawan extends CI_Controller {
                 'password' => $this->input->post('password'),
                 'jabatan' => $this->input->post('jabatan')
             ];
-            $this->db->where('id_user', $id_user);
-            $this->db->update('tb_user', $user);
+            $this->user->editUser($id_user, $user);
     
             $id_karyawan = $this->input->post('id_karyawan');
             $karyawan = [
@@ -131,8 +100,7 @@ class Karyawan extends CI_Controller {
                 'email' => $this->input->post('email'),
                 'alamat' => $this->input->post('alamat')
             ];
-            $this->db->where('id_user', $id_user);
-            $this->db->update('tb_karyawan', $karyawan);
+            $this->karyawan->editKaryawan($id_karyawan, $karyawan);
     
             $this->session->set_flashdata("pesan", "<script>Swal.fire({title:'Berhasil', text:'Data berhasil diupdate', icon:'success'})</script>");
             redirect('pemilik/karyawan');
@@ -140,13 +108,7 @@ class Karyawan extends CI_Controller {
     }
 
     public function delete($id_user) {
-        $this->db->trans_start();
-        $this->db->where('id_user', $id_user);
-        $this->db->delete('tb_karyawan');
-    
-        $this->db->where('id_user', $id_user);
-        $this->db->delete('tb_user');
-        $this->db->trans_complete();
+        $this->user->deleteUser($id_user);
         $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Berhasil', text:'Hapus data karyawan berhasil', icon:'success'})</script>");
 		redirect('pemilik/karyawan');
     }

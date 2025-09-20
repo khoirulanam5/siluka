@@ -5,8 +5,7 @@ class Auth extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->library('session');
-        $this->load->library('form_validation');
+        $this->load->model(['UserModel' => 'user', 'PasienModel' => 'pasien']);
     }
 
     public function index() {
@@ -79,26 +78,6 @@ class Auth extends CI_Controller {
         }
     }
 
-    public function generateIdUser() {
-        $unik = 'U';
-        $kode = $this->db->query("SELECT MAX(id_user) LAST_NO FROM tb_user WHERE id_user LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-      }
-
-      public function generateIdPasien() {
-        $unik = 'P';
-        $kode = $this->db->query("SELECT MAX(id_pasien) LAST_NO FROM tb_pasien WHERE id_pasien LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-      }
-
     public function register() {
         $this->form_validation->set_rules('username', 'Username', 'required|is_unique[tb_user.username]');
         $this->form_validation->set_rules('password', 'Password', 'required');
@@ -114,17 +93,16 @@ class Auth extends CI_Controller {
             $this->load->view('auth/register');
         } else {
             $user = [
-                'id_user' => $this->generateIdUser(),
+                'id_user' => $this->user->generateIdUser(),
                 'username' => $this->input->post('username'),
                 'password' => $this->input->post('password'),
                 'jabatan' => 'Pasien'
             ];
-            $this->db->insert('tb_user', $user);
-
+            $this->user->addUser($user);
             $id_user = $user['id_user'];
 
             $pasien = [
-                'id_pasien' => $this->generateIdPasien(),
+                'id_pasien' => $this->pasien->generateIdPasien(),
                 'id_user' => $id_user,
                 'nik' => $this->input->post('nik'),
                 'nm_pasien' => $this->input->post('nm_pasien'),
@@ -134,7 +112,7 @@ class Auth extends CI_Controller {
                 'email' => $this->input->post('email'),
                 'alamat' => $this->input->post('alamat')
             ];
-            $this->db->insert('tb_pasien', $pasien);
+            $this->pasien->addPasien($pasien);
     
             $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Selamat', text:'Akun berhasil dibuat', icon:'success'})</script>");
 			redirect('auth');

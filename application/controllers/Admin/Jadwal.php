@@ -5,17 +5,13 @@ class Jadwal extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->library('session');
-        $this->load->library('form_validation');
+        $this->load->model(['JadwalModel' => 'jadwal']);
+        isadmin();
     }
 
     public function index() {
         $data['title'] = 'Jadwal Perawatan';
-        
-        $this->db->select('tb_jadwal.*, tb_karyawan.*');
-        $this->db->from('tb_jadwal');
-        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan');
-        $data['jadwal'] = $this->db->get()->result();
+        $data['jadwal'] = $this->jadwal->getAll()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
@@ -24,25 +20,9 @@ class Jadwal extends CI_Controller {
         $this->load->view('template/footer');
     }
 
-    public function generateIdJadwal() {
-        $unik = 'JDL';
-        $kode = $this->db->query("SELECT MAX(id_jadwal) LAST_NO FROM tb_jadwal WHERE id_jadwal LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 3, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-    }
-
     public function add() {
         $data['title'] = 'Tambah Jadwal';
-
-        $this->db->select('tb_jadwal.*, tb_karyawan.*, tb_user.*');
-        $this->db->from('tb_jadwal');
-        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan', 'right');
-        $this->db->join('tb_user', 'tb_karyawan.id_user = tb_user.id_user', 'right');
-        $this->db->where('tb_user.jabatan', 'Perawat');
-        $data['perawat'] = $this->db->get()->result();
+        $data['perawat'] = $this->jadwal->selectPerawat()->result();
 
         $this->form_validation->set_rules('id_karyawan', 'ID Perawat', 'required');
         $this->form_validation->set_rules('hari', 'Hari', 'required');
@@ -58,14 +38,14 @@ class Jadwal extends CI_Controller {
             $this->load->view('template/footer');
         } else {
             $jadwal = [
-                'id_jadwal' => $this->generateIdJadwal(),
+                'id_jadwal' => $this->jadwal->generateIdJadwal(),
                 'id_karyawan' => $this->input->post('id_karyawan'),
                 'hari' => $this->input->post('hari'),
                 'mulai' => $this->input->post('mulai'),
                 'selesai' => $this->input->post('selesai'),
                 'jenis_perawatan' => $this->input->post('jenis_perawatan')
             ];
-            $this->db->insert('tb_jadwal', $jadwal);
+            $this->jadwal->addJadwal($jadwal);
 
             $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Selamat', text:'Jadwal Berhasil Ditambahkan', icon:'success'})</script>");
 			redirect('admin/jadwal');
@@ -74,19 +54,8 @@ class Jadwal extends CI_Controller {
 
     public function edit($id_jadwal) {
         $data['title'] = 'Edit Jadwal';
-
-        $this->db->select('tb_jadwal.*, tb_karyawan.*, tb_user.*');
-        $this->db->from('tb_jadwal');
-        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan', 'right');
-        $this->db->join('tb_user', 'tb_karyawan.id_user = tb_user.id_user', 'right');
-        $this->db->where('tb_user.jabatan', 'Perawat');
-        $data['perawat'] = $this->db->get()->result();
-
-        $this->db->select('tb_jadwal.*, tb_karyawan.*');
-        $this->db->from('tb_jadwal');
-        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan');
-        $this->db->where('tb_jadwal.id_jadwal', $id_jadwal);
-        $data['jadwal'] = $this->db->get()->row();
+        $data['perawat'] = $this->jadwal->selectPerawat()->result();
+        $data['jadwal'] = $this->jadwal->getById($id_jadwal)->row();
 
         $this->form_validation->set_rules('id_karyawan', 'ID Perawat', 'required');
         $this->form_validation->set_rules('hari', 'Hari', 'required');
@@ -109,8 +78,7 @@ class Jadwal extends CI_Controller {
                 'selesai' => $this->input->post('selesai'),
                 'jenis_perawatan' => $this->input->post('jenis_perawatan')
             ];
-            $this->db->where('id_jadwal', $id_jadwal);
-            $this->db->update('tb_jadwal', $jadwal);
+            $this->jadwal->editJadwal($id_jadwal, $jadwal);
 
             $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Selamat', text:'Jadwal Berhasil Diupdate', icon:'success'})</script>");
 			redirect('admin/jadwal');
@@ -118,8 +86,7 @@ class Jadwal extends CI_Controller {
     }
 
     public function delete($id_jadwal) {
-        $this->db->where('id_jadwal', $id_jadwal);
-        $this->db->delete('tb_jadwal');
+        $this->jadwal->deleteJadwal($id_jadwal);
         $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Berhasil', text:'Hapus data jadwal berhasil', icon:'success'})</script>");
 		redirect('admin/jadwal');
     }

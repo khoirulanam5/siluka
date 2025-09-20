@@ -5,6 +5,8 @@ class Pendaftaran extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->load->model(['PendaftaranModel' => 'pendaftaran']);
+        ispasien();
     }
 
     public function index() {
@@ -103,8 +105,7 @@ class Pendaftaran extends CI_Controller {
     }
     
     public function delete($id_pendaftaran) {
-        $this->db->where('id_pendaftaran', $id_pendaftaran);
-        $this->db->delete('tb_pendaftaran');
+        $this->pendaftaran->deletePendaftaran($id_pendaftaran);
         $this->session->set_flashdata("pesan", "<script> Swal.fire({title: 'Berhasil', text: 'Data Pendaftaran Berhasil Dihapus', icon: 'success'})</script>");
         redirect('pasien/pendaftaran');
     }

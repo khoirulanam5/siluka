@@ -5,44 +5,19 @@ class Pasien extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->library('session');
-        $this->load->library('form_validation');
+        $this->load->model(['PasienModel' => 'pasien', 'UserModel' => 'user']);
+        isadmin();
     }
 
     public function index() {
         $data['title'] = 'Data Pasien';
-        
-        $this->db->select('tb_user.*, tb_pasien.*');
-        $this->db->from('tb_user');
-        $this->db->join('tb_pasien', 'tb_user.id_user = tb_pasien.id_user');
-        $this->db->where('jabatan =', 'Pasien');
-        $data['pasien'] = $this->db->get()->result();
+        $data['pasien'] = $this->pasien->getAll()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
         $this->load->view('template/sidebar', $data);
         $this->load->view('admin/pasien/index', $data);
         $this->load->view('template/footer');
-    }
-
-    public function generateIdUser() {
-        $unik = 'U';
-        $kode = $this->db->query("SELECT MAX(id_user) LAST_NO FROM tb_user WHERE id_user LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-    }
-
-    public function generateIdPasien() {
-        $unik = 'P';
-        $kode = $this->db->query("SELECT MAX(id_pasien) LAST_NO FROM tb_pasien WHERE id_pasien LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
     }
 
     public function add() {
@@ -66,16 +41,16 @@ class Pasien extends CI_Controller {
             $this->load->view('template/footer');
         } else {
             $user = [
-                'id_user' => $this->generateIdUser(),
+                'id_user' => $this->user->generateIdUser(),
                 'username' => $this->input->post('username'),
                 'password' => $this->input->post('password'),
                 'jabatan' => 'Pasien'
             ];
-            $this->db->insert('tb_user', $user);
+            $this->user->addUser($user);
             $id_user = $user['id_user'];
 
             $pasien = [
-                'id_pasien' => $this->generateIdPasien(),
+                'id_pasien' => $this->pasien->generateIdPasien(),
                 'id_user' => $id_user,
                 'nik' => $this->input->post('nik'),
                 'nm_pasien' => $this->input->post('nm_pasien'),
@@ -85,7 +60,7 @@ class Pasien extends CI_Controller {
                 'email' => $this->input->post('email'),
                 'alamat' => $this->input->post('alamat')
             ];
-            $this->db->insert('tb_pasien', $pasien);
+            $this->pasien->addPasien($pasien);
     
             $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Selamat', text:'Data Pasien Berhasil Ditambahkan', icon:'success'})</script>");
 			redirect('admin/pasien');
@@ -94,12 +69,7 @@ class Pasien extends CI_Controller {
 
     public function edit($id_user) {
         $data['title'] = 'Edit Data Pasien';
-
-        $this->db->select('tb_user.*, tb_pasien.*');
-        $this->db->from('tb_user');
-        $this->db->join('tb_pasien', 'tb_user.id_user = tb_pasien.id_user');
-        $this->db->where('tb_user.id_user', $id_user);
-        $data['user'] = $this->db->get()->row();
+        $data['user'] = $this->pasien->getById($id_user)->row();
 
         $this->form_validation->set_rules('nik', 'NIK', 'required|numeric');
         $this->form_validation->set_rules('nm_pasien', 'Nama Pasien', 'required');
@@ -125,8 +95,7 @@ class Pasien extends CI_Controller {
                 'password' => $this->input->post('password'),
                 'jabatan' => 'Pasien'
             ];
-            $this->db->where('id_user', $id_user);
-            $this->db->update('tb_user', $user);
+            $this->user->editUser($id_user, $user);
     
             $id_pasien = $this->input->post('id_pasien');
             $pasien = [
@@ -140,8 +109,7 @@ class Pasien extends CI_Controller {
                 'email' => $this->input->post('email'),
                 'alamat' => $this->input->post('alamat')
             ];
-            $this->db->where('id_user', $id_user);
-            $this->db->update('tb_pasien', $pasien);
+            $this->pasien->editPasien($id_pasien, $pasien);
     
             $this->session->set_flashdata("pesan", "<script>Swal.fire({title:'Berhasil', text:'Data berhasil diupdate', icon:'success'})</script>");
             redirect('admin/pasien');
@@ -149,13 +117,7 @@ class Pasien extends CI_Controller {
     }
 
     public function delete($id_user) {
-        $this->db->trans_start();
-        $this->db->where('id_user', $id_user);
-        $this->db->delete('tb_pasien');
-    
-        $this->db->where('id_user', $id_user);
-        $this->db->delete('tb_user');
-        $this->db->trans_complete();
+        $this->pasien->deletePasien($id_user);
         $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Berhasil', text:'Hapus data pasien berhasil', icon:'success'})</script>");
 		redirect('admin/pasien');
     }
