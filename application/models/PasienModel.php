@@ -5,6 +5,16 @@ class PasienModel extends CI_Model {
 
     private $_table = 'tb_pasien';
 
+    public function generateIdPasien() {
+        $unik = 'P';
+        $kode = $this->db->query("SELECT MAX(id_pasien) LAST_NO FROM tb_pasien WHERE id_pasien LIKE '".$unik."%'")->row()->LAST_NO;
+        $urutan = (int) substr($kode, 1, 3);
+        $urutan++;
+        $huruf = $unik;
+        $kode = $huruf . sprintf("%03s", $urutan);
+        return $kode;
+    }
+
     public function getAll() {
         $this->db->select('tb_user.*, tb_pasien.*');
         $this->db->from('tb_user');
@@ -20,16 +30,6 @@ class PasienModel extends CI_Model {
         $this->db->where('tb_user.id_user', $id_user);
         return $this->db->get();
     }
-
-    public function generateIdPasien() {
-        $unik = 'P';
-        $kode = $this->db->query("SELECT MAX(id_pasien) LAST_NO FROM tb_pasien WHERE id_pasien LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 1, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
-      }
 
     public function addPasien($pasien) {
         return $this->db->insert($this->_table, $pasien);

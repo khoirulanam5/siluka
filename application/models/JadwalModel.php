@@ -5,6 +5,16 @@ class JadwalModel extends CI_Model {
 
     private $_table = 'tb_jadwal';
 
+    public function generateIdJadwal() {
+        $unik = 'JDL';
+        $kode = $this->db->query("SELECT MAX(id_jadwal) LAST_NO FROM tb_jadwal WHERE id_jadwal LIKE '".$unik."%'")->row()->LAST_NO;
+        $urutan = (int) substr($kode, 3, 3);
+        $urutan++;
+        $huruf = $unik;
+        $kode = $huruf . sprintf("%03s", $urutan);
+        return $kode;
+    }
+
     public function getAll() {
         $this->db->select('tb_jadwal.*, tb_karyawan.*');
         $this->db->from('tb_jadwal');
@@ -20,14 +30,12 @@ class JadwalModel extends CI_Model {
         return $this->db->get();
     }
 
-    public function generateIdJadwal() {
-        $unik = 'JDL';
-        $kode = $this->db->query("SELECT MAX(id_jadwal) LAST_NO FROM tb_jadwal WHERE id_jadwal LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 3, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
+    public function getByUsername($username) {
+        $this->db->select('tb_pasien.id_pasien, tb_user.username');
+        $this->db->from('tb_user');
+        $this->db->join('tb_pasien', 'tb_user.id_user = tb_pasien.id_user', 'inner');
+        $this->db->where('tb_user.username', $username);
+        return $this->db->get();
     }
     
     public function selectPerawat() {

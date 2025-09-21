@@ -65,7 +65,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <a class="btn btn-sm btn-primary" href="<?= base_url('pasien/hasil/nota_k/'.$val->id_perawatan) ?>" target="_blank"><li class="fas fa-print"></li></a>
+                                                        <a class="btn btn-sm btn-primary" href="<?= base_url('admin/hasil/nota_k/'.$val->id_perawatan) ?>" target="_blank"><li class="fas fa-print"></li></a>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

@@ -5,16 +5,13 @@ class Feedback extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->load->model(['SaranModel' => 'saran']);
         isadmin();
     }
 
     public function index() {
         $data['title'] = 'Kepuasan Pelanggan';
-        
-        $this->db->select('tb_saran.*, tb_pasien.*');
-        $this->db->from('tb_saran');
-        $this->db->join('tb_pasien', 'tb_saran.id_pasien = tb_pasien.id_pasien');
-        $data['feedback'] = $this->db->get()->result();
+        $data['feedback'] = $this->saran->getAll()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
@@ -24,8 +21,7 @@ class Feedback extends CI_Controller {
     }
 
     public function delete($id_saran) {
-        $this->db->where('id_saran', $id_saran);
-        $this->db->delete('tb_saran');
+        $this->saran->deleteSaran($id_saran);
         $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Berhasil', text:'Hapus data saran berhasil', icon:'success'})</script>");
 		redirect('admin/feedback');
     }

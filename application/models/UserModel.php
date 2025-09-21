@@ -5,14 +5,6 @@ class UserModel extends CI_Model {
 
     private $_table = 'tb_user';
 
-    public function getById($id_user) {
-        $this->db->select('tb_user.*, tb_karyawan.*');
-        $this->db->from('tb_user');
-        $this->db->join('tb_karyawan', 'tb_user.id_user = tb_karyawan.id_user');
-        $this->db->where('tb_user.id_user', $id_user);
-        return $this->db->get();
-    }
-
     public function generateIdUser() {
         $unik = 'U';
         $kode = $this->db->query("SELECT MAX(id_user) LAST_NO FROM tb_user WHERE id_user LIKE '".$unik."%'")->row()->LAST_NO;
@@ -21,6 +13,14 @@ class UserModel extends CI_Model {
         $huruf = $unik;
         $kode = $huruf . sprintf("%03s", $urutan);
         return $kode;
+    }
+
+    public function getById($id_user) {
+        $this->db->select('tb_user.*, tb_karyawan.*');
+        $this->db->from('tb_user');
+        $this->db->join('tb_karyawan', 'tb_user.id_user = tb_karyawan.id_user');
+        $this->db->where('tb_user.id_user', $id_user);
+        return $this->db->get();
     }
 
     public function addUser($user) {

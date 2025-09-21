@@ -35,6 +35,7 @@
             <div class="container h-100">
                 <div class="row align-items-center justify-content-center h-100">
                     <div class="col-12">
+                        <?= $this->session->flashdata('pesan'); ?>
                         <div class="row align-items-center">
                             <div class="col-lg-6 ">
                                 <h2 class="mb-2">Pendaftaran</h2>

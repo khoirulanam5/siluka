@@ -77,7 +77,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <a class="btn btn-sm btn-primary" href="<?= base_url('pasien/hasil/nota_h/'.$val->id_homecare) ?>" target="_blank"><li class="fas fa-print"></li></a>
+                                                        <a class="btn btn-sm btn-primary" href="<?= base_url('admin/hasil/nota_h/'.$val->id_homecare) ?>" target="_blank"><li class="fas fa-print"></li></a>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

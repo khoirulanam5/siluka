@@ -90,6 +90,7 @@ class Auth extends CI_Controller {
         $this->form_validation->set_rules('alamat', 'Alamat', 'required');
 
         if ($this->form_validation->run() == FALSE) {
+            $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Gagal', text:'username sudah digunakan', icon:'error'})</script>");
             $this->load->view('auth/register');
         } else {
             $user = [
