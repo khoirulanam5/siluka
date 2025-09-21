@@ -5,6 +5,16 @@ class PendaftaranModel extends CI_Model {
 
     private $_table = 'tb_pendaftaran';
 
+    public function generateIdPendaftaran() {
+        $unik = 'PDF';
+        $kode = $this->db->query("SELECT MAX(id_pendaftaran) LAST_NO FROM tb_pendaftaran WHERE id_pendaftaran LIKE '".$unik."%'")->row()->LAST_NO;
+        $urutan = (int) substr($kode, 3, 3);
+        $urutan++;
+        $huruf = $unik;
+        $kode = $huruf . sprintf("%03s", $urutan);
+        return $kode;
+    }
+
     public function getAll() {
         $this->db->select('tb_pendaftaran.*, tb_pasien.*, tb_jadwal.*, tb_karyawan.*');
         $this->db->from('tb_pendaftaran');
@@ -12,6 +22,32 @@ class PendaftaranModel extends CI_Model {
         $this->db->join('tb_jadwal', 'tb_pendaftaran.id_jadwal = tb_jadwal.id_jadwal');
         $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan');
         return $this->db->get();
+    }
+
+    public function getPendaftaranByPasien() {
+        $this->db->select('tb_pendaftaran.*, tb_pasien.*, tb_jadwal.*, tb_karyawan.*');
+        $this->db->from('tb_pendaftaran');
+        $this->db->join('tb_pasien', 'tb_pendaftaran.id_pasien = tb_pasien.id_pasien');
+        $this->db->join('tb_jadwal', 'tb_pendaftaran.id_jadwal = tb_jadwal.id_jadwal');
+        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan');
+        $this->db->where('tb_pasien.id_pasien', $this->session->userdata('id_pasien'));
+        return $this->db->get();
+    }
+
+    public function selectKaryawan() {
+        $this->db->select('tb_jadwal.*, tb_karyawan.nm_karyawan');
+        $this->db->from('tb_jadwal');
+        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan', 'left');
+        return $this->db->get();
+    }
+
+    public function addPendaftaran($data) {
+        return $this->db->insert($this->_table, $data);
+    }
+
+    public function editPendaftaran($id_pendaftaran, $data) {
+        $this->db->where('id_pendaftaran', $id_pendaftaran);
+        return $this->db->update($this->_table, $data);
     }
 
     public function verify($id_pendaftaran) {
@@ -45,9 +81,9 @@ class PendaftaranModel extends CI_Model {
         $this->db->query("
         UPDATE tb_pendaftaran SET notif='Terkirim' WHERE id_pendaftaran = '".$id_pendaftaran."'");
   
-        $userkey = "8jhyem";
-        $passkey = "n65hmpn9lo";
-        $url = "https://console.zenziva.net/wareguler/api/sendWA/";
+        $userkey = $this->config->item('wa_userkey');
+        $passkey = $this->config->item('wa_passkey');
+        $url     = $this->config->item('wa_url');
   
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $url);
@@ -93,10 +129,10 @@ Dimohon pasien dapat datang ke klinik sesuai dengan hari dan jam yang telah dite
         $this->db->query("
         UPDATE tb_pendaftaran SET notif_perawat='Terkirim' WHERE id_pendaftaran = '".$id_pendaftaran."'");
   
-        $userkey = "8jhyem";
-        $passkey = "n65hmpn9lo";
-        $url = "https://console.zenziva.net/wareguler/api/sendWA/";
-  
+        $userkey = $this->config->item('wa_userkey');
+        $passkey = $this->config->item('wa_passkey');
+        $url     = $this->config->item('wa_url');
+
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $url);
         curl_setopt($curlHandle, CURLOPT_HEADER, 0);

@@ -5,24 +5,13 @@ class Hasil extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->model(['HasilModel' => 'hasil']);
+        $this->load->model(['HasilModel' => 'hasil', 'PembayaranModel' => 'pembayaran']);
         ispasien();
     }
 
     public function index() {
         $data['title'] = 'Riwayat Perawatan Klinik';
-
-        $this->db->select('tb_perawatan.*, tb_pendaftaran.*, tb_pasien.*, tb_jadwal.*, tb_karyawan.*, tb_hasil.*, tb_pembayaran.*');
-        $this->db->from('tb_perawatan');
-        $this->db->join('tb_pendaftaran', 'tb_perawatan.id_pendaftaran = tb_pendaftaran.id_pendaftaran', 'right');
-        $this->db->join('tb_pasien', 'tb_pendaftaran.id_pasien = tb_pasien.id_pasien', 'right');
-        $this->db->join('tb_jadwal', 'tb_pendaftaran.id_jadwal = tb_jadwal.id_jadwal', 'inner');
-        $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan', 'inner');
-        $this->db->join('tb_hasil', 'tb_perawatan.id_perawatan = tb_hasil.id_perawatan', 'left');
-        $this->db->join('tb_pembayaran', 'tb_perawatan.id_perawatan = tb_pembayaran.id_perawatan', 'left');
-        $this->db->where('tb_hasil.status_perawatan', 'Perawatan Klinik Selesai');
-        $this->db->where('tb_pasien.id_pasien', $this->session->userdata('id_pasien'));
-        $data['hasil'] = $this->db->get()->result();
+        $data['hasil'] = $this->hasil->getKlinikByPasien()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
@@ -33,16 +22,7 @@ class Hasil extends CI_Controller {
 
     public function homecare() {
         $data['title'] = 'Riwayat Perawatan Homecare';
-
-        $this->db->select('tb_homecare.*, tb_pasien.*, tb_karyawan.*, tb_pembayaran.*, tb_hasil.*');
-        $this->db->from('tb_homecare');
-        $this->db->join('tb_pasien', 'tb_homecare.id_pasien = tb_pasien.id_pasien', 'inner');
-        $this->db->join('tb_karyawan', 'tb_homecare.id_karyawan = tb_karyawan.id_karyawan', 'inner');
-        $this->db->join('tb_pembayaran', 'tb_homecare.id_homecare = tb_pembayaran.id_homecare', 'inner');
-        $this->db->join('tb_hasil', 'tb_hasil.id_homecare = tb_homecare.id_homecare', 'inner');
-        $this->db->where('tb_hasil.status_perawatan', 'Perawatan Homecare selesai');
-        $this->db->where('tb_pasien.id_pasien', $this->session->userdata('id_pasien'));
-        $data['hasil'] = $this->db->get()->result();
+        $data['hasil'] = $this->hasil->getHomecareByPasien()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
@@ -54,15 +34,8 @@ class Hasil extends CI_Controller {
     public function bayar($id_pembayaran) {
         $data['title'] = 'Form Pembayaran';
         $data['id_pembayaran'] = $id_pembayaran;
+        $data['total'] = $this->pembayaran->getBayarById($id_pembayaran)->row();
 
-        $this->db->select('tb_pembayaran.*, tb_perawatan.biaya_perawatan, tb_homecare.biaya_homecare');
-        $this->db->from('tb_pembayaran');
-        $this->db->join('tb_perawatan', 'tb_perawatan.id_perawatan = tb_pembayaran.id_perawatan', 'left');
-        $this->db->join('tb_homecare', 'tb_homecare.id_homecare = tb_pembayaran.id_homecare', 'left');
-        $this->db->where('tb_pembayaran.id_pembayaran', $id_pembayaran);
-        $data['total'] = $this->db->get()->row(); // Mengambil satu baris saja
-    
-        // Validasi ID pembayaran
         $cek_pembayaran = $this->db->get_where('tb_pembayaran', ['id_pembayaran' => $id_pembayaran])->row();
         if (!$cek_pembayaran) {
             $this->session->set_flashdata("pesan", "<script> Swal.fire({title:'Error', text:'ID Pembayaran tidak valid!', icon:'error'})</script>");
@@ -83,7 +56,7 @@ class Hasil extends CI_Controller {
             $this->load->view('template/header', $data);
             $this->load->view('template/topbar', $data);
             $this->load->view('template/sidebar', $data);
-            $this->load->view('pasien/hasil/bayar', $data); // Tampilkan error di halaman ini
+            $this->load->view('pasien/hasil/bayar', $data);
             $this->load->view('template/footer');
             return;
         }
@@ -94,8 +67,7 @@ class Hasil extends CI_Controller {
             'bayar' => $image
         ];
     
-        $this->db->where('id_pembayaran', $id_pembayaran);
-        $this->db->update('tb_pembayaran', $bayar);
+        $this->pembayaran->editBayar($id_pembayaran, $bayar);
     
         $this->session->set_flashdata("pesan", "<script> Swal.fire({title:'Berhasil', text:'Pembayaran Berhasil Dikirim', icon:'success'})</script>");
         redirect('front/feedback_v');

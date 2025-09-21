@@ -40,7 +40,7 @@ class Homecare extends CI_Controller {
                 'status' => 'Terverifikasi'
             ];
 
-            $this->homecare->updateHomecare($data, $id_homecare);
+            $this->homecare->editHomecare($data, $id_homecare);
 
             $this->homecare->sendNotifPasien($id_homecare);
             $this->homecare->sendNotifPerawat($id_homecare);

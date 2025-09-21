@@ -15,6 +15,10 @@ class PerawatanModel extends CI_Model {
         return $kode;
     }
 
+    public function addPerawatan($data) {
+        return $this->db->insert($this->_table, $data);
+    }
+
     public function getAll() {
         $this->db->select('tb_perawatan.*, tb_pendaftaran.*, tb_pasien.*, tb_jadwal.*, tb_karyawan.*, tb_hasil.*');
         $this->db->from('tb_perawatan');
@@ -37,10 +41,6 @@ class PerawatanModel extends CI_Model {
         $this->db->join('tb_karyawan', 'tb_jadwal.id_karyawan = tb_karyawan.id_karyawan', 'inner');
         $this->db->where('tb_jadwal.jenis_perawatan', 'Klinik');
         $this->db->where('tb_jadwal.id_karyawan', $this->session->userdata('id_karyawan'));
-        return $this->db->get()->result();
-    }
-
-    public function addPerawatan($data) {
-        return $this->db->insert($this->_table, $data);
+        return $this->db->get();
     }
 }

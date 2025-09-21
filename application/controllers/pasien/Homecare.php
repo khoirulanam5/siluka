@@ -5,34 +5,19 @@ class Homecare extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->load->model(['HomecareModel' => 'homecare']);
         ispasien();
     }
 
     public function index() {
         $data['title'] = 'Pelayanan Homecare';
-
-        $this->db->select('tb_homecare.*, tb_pasien.*, tb_karyawan.*');
-        $this->db->from('tb_homecare');
-        $this->db->join('tb_pasien', 'tb_homecare.id_pasien = tb_pasien.id_pasien', 'left');
-        $this->db->join('tb_karyawan', 'tb_homecare.id_karyawan = tb_karyawan.id_karyawan', 'left');
-        $this->db->where('tb_pasien.id_pasien', $this->session->userdata('id_pasien'));
-        $data['homecare'] = $this->db->get()->result();
+        $data['homecare'] = $this->homecare->getHomecareByPasien()->result();
 
         $this->load->view('template/header', $data);
         $this->load->view('template/topbar', $data);
         $this->load->view('template/sidebar', $data);
         $this->load->view('pasien/homecare/index', $data);
         $this->load->view('template/footer');
-    }
-
-    public function generateIdHomecare() {
-        $unik = 'HMCR';
-        $kode = $this->db->query("SELECT MAX(id_homecare) LAST_NO FROM tb_homecare WHERE id_homecare LIKE '".$unik."%'")->row()->LAST_NO;
-        $urutan = (int) substr($kode, 4, 3);
-        $urutan++;
-        $huruf = $unik;
-        $kode = $huruf . sprintf("%03s", $urutan);
-        return $kode;
     }
 
     public function add() {
@@ -59,7 +44,7 @@ class Homecare extends CI_Controller {
             $image = $this->upload->data('file_name');
             
             $data = [
-                'id_homecare' => $this->generateIdHomecare(),
+                'id_homecare' => $this->homecare->generateIdHomecare(),
                 'id_pasien' => $this->session->userdata('id_pasien'),
                 'nama_perawatan' => $this->input->post('nama_perawatan'),
                 'foto' => $image,
@@ -68,7 +53,7 @@ class Homecare extends CI_Controller {
                 'alamat_kunjungan' => $this->input->post('alamat_kunjungan')
             ];
 
-            $this->db->insert('tb_homecare', $data);
+            $this->homecare->addHomecare($data);
 
             $this->session->set_flashdata("pesan","<script> Swal.fire({title:'Berhasil', text:'Pendaftaran Homecare berhasil, Tunggu untuk admin memverifikasi pendaftaran', icon:'success'})</script>");
 			redirect('pasien/homecare');

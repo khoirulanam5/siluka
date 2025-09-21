@@ -5,11 +5,53 @@ class HomecareModel extends CI_Model {
 
     private $_table = 'tb_homecare';
 
+    public function generateIdHomecare() {
+        $unik = 'HMCR';
+        $kode = $this->db->query("SELECT MAX(id_homecare) LAST_NO FROM tb_homecare WHERE id_homecare LIKE '".$unik."%'")->row()->LAST_NO;
+        $urutan = (int) substr($kode, 4, 3);
+        $urutan++;
+        $huruf = $unik;
+        $kode = $huruf . sprintf("%03s", $urutan);
+        return $kode;
+    }
+
     public function getAll() {
         $this->db->select('tb_homecare.*, tb_pasien.*, tb_karyawan.*');
         $this->db->from('tb_homecare');
         $this->db->join('tb_pasien', 'tb_homecare.id_pasien = tb_pasien.id_pasien', 'left');
         $this->db->join('tb_karyawan', 'tb_homecare.id_karyawan = tb_karyawan.id_karyawan', 'left');
+        return $this->db->get();
+    }
+
+    public function getHomecare() {
+        $this->db->select('tb_homecare.*, tb_pasien.*, tb_karyawan.*');
+        $this->db->from('tb_homecare');
+        $this->db->join('tb_pasien', 'tb_homecare.id_pasien = tb_pasien.id_pasien', 'left');
+        $this->db->join('tb_karyawan', 'tb_homecare.id_karyawan = tb_karyawan.id_karyawan', 'left');
+        $this->db->where('tb_karyawan.id_karyawan', $this->session->userdata('id_karyawan'));
+        $this->db->group_start();
+        $this->db->where('tb_homecare.status', 'Terverifikasi');
+        $this->db->or_where('tb_homecare.status', 'Selesai');
+        $this->db->group_end();
+        return $this->db->get();
+    }
+
+    public function getUserdata() {
+        $this->db->select('tb_homecare.*, tb_pasien.*, tb_karyawan.*');
+        $this->db->from('tb_homecare');
+        $this->db->join('tb_pasien', 'tb_homecare.id_pasien = tb_pasien.id_pasien', 'left');
+        $this->db->join('tb_karyawan', 'tb_homecare.id_karyawan = tb_karyawan.id_karyawan', 'left');
+        $this->db->where('tb_karyawan.id_karyawan', $this->session->userdata('id_karyawan'));
+        $this->db->where('tb_homecare.status', 'Terverifikasi');
+        return $this->db->get();
+    }
+
+    public function getHomecareByPasien() {
+        $this->db->select('tb_homecare.*, tb_pasien.*, tb_karyawan.*');
+        $this->db->from('tb_homecare');
+        $this->db->join('tb_pasien', 'tb_homecare.id_pasien = tb_pasien.id_pasien', 'left');
+        $this->db->join('tb_karyawan', 'tb_homecare.id_karyawan = tb_karyawan.id_karyawan', 'left');
+        $this->db->where('tb_pasien.id_pasien', $this->session->userdata('id_pasien'));
         return $this->db->get();
     }
 
@@ -21,7 +63,11 @@ class HomecareModel extends CI_Model {
         return $this->db->get();
     }
 
-    public function updateHomecare($data, $id_homecare) {
+    public function addHomecare($data) {
+        return $this->db->insert($this->_table, $data);
+    }
+
+    public function editHomecare($data, $id_homecare) {
         $this->db->where('id_homecare', $id_homecare);
         return $this->db->update($this->_table, $data);
     }
@@ -56,10 +102,10 @@ class HomecareModel extends CI_Model {
         $this->db->query("
         UPDATE tb_homecare SET notif='Terkirim' WHERE id_homecare = '".$id_homecare."'");
   
-        $userkey = "a859631d94df";
-        $passkey = "3f109df052a53eaa3237060a";
-        $url = "https://console.zenziva.net/wareguler/api/sendWA/";
-  
+        $userkey = $this->config->item('wa_userkey');
+        $passkey = $this->config->item('wa_passkey');
+        $url     = $this->config->item('wa_url');
+
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $url);
         curl_setopt($curlHandle, CURLOPT_HEADER, 0);
@@ -106,9 +152,9 @@ Dimohon pasien dapat standby dirumah pada waktu kunjungan perawatan (Homecare). 
         $this->db->query("
         UPDATE tb_homecare SET notif_perawat='Terkirim' WHERE id_homecare = '".$id_homecare."'");
   
-        $userkey = "a859631d94df";
-        $passkey = "3f109df052a53eaa3237060a";
-        $url = "https://console.zenziva.net/wareguler/api/sendWA/";
+        $userkey = $this->config->item('wa_userkey');
+        $passkey = $this->config->item('wa_passkey');
+        $url     = $this->config->item('wa_url');
   
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $url);
