@@ -35,4 +35,4 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 .env
 .env.*
 application/config/api.php
-db_siluka.sql
+*.sql
