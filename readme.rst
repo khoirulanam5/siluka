@@ -1,71 +1,67 @@
-###################
-What is CodeIgniter
-###################
+# 🏥 Sistem Rawat Luka (SILUKA)
 
-CodeIgniter is an Application Development Framework - a toolkit - for people
-who build web sites using PHP. Its goal is to enable you to develop projects
-much faster than you could if you were writing code from scratch, by providing
-a rich set of libraries for commonly needed tasks, as well as a simple
-interface and logical structure to access these libraries. CodeIgniter lets
-you creatively focus on your project by minimizing the amount of code needed
-for a given task.
+**SILUKA (Sistem Rawat Luka)** adalah aplikasi berbasis web yang dikembangkan menggunakan **CodeIgniter 3 (CI3)** untuk membantu tenaga kesehatan dalam **mencatat, memantau, dan mengelola data perawatan luka pasien** secara digital.  
+Sistem ini berfungsi layaknya sistem **rekam medis sederhana**, namun difokuskan pada pencatatan dan pengelolaan tindakan perawatan luka agar lebih efisien, akurat, dan terdokumentasi dengan baik.
 
-*******************
-Release Information
-*******************
+---
 
-This repo contains in-development code for future releases. To download the
-latest stable release please visit the `CodeIgniter Downloads
-<https://codeigniter.com/download>`_ page.
+## 🚀 Fitur Utama
 
-**************************
-Changelog and New Features
-**************************
+### 1. **Autentikasi & Manajemen Pengguna**
+- Login dan logout pengguna (admin, pasien, perawat, pemilik).
+- Hak akses berdasarkan peran (role-based access control).
+- Manajemen akun pengguna (tambah, edit, nonaktifkan).
 
-You can find a list of all changes for each release in the `user
-guide change log <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/changelog.rst>`_.
+### 2. **Data Pasien**
+- Pencatatan data pasien baru (identitas, alamat, riwayat kesehatan dasar).
+- Pencarian dan filter data pasien.
+- Riwayat kunjungan dan tindakan rawat luka pasien.
 
-*******************
-Server Requirements
-*******************
+### 3. **Pendaftaran & Kunjungan**
+- Input kunjungan pasien baru.
+- Penjadwalan rawat luka (tindakan harian atau berkala).
+- Nomor registrasi otomatis.
 
-PHP version 5.6 or newer is recommended.
+### 4. **Rekam Rawat Luka**
+- Pencatatan hasil pemeriksaan dan tindakan rawat luka.
+- Upload foto luka sebelum dan sesudah perawatan (jika tersedia).
+- Catatan tindakan (jenis perawatan, dressing, obat, petugas yang menangani).
+- Monitoring perkembangan luka pasien.
 
-It should work on 5.3.7 as well, but we strongly advise you NOT to run
-such old versions of PHP, because of potential security and performance
-issues, as well as missing features.
+### 5. **Laporan & Statistik**
+- Laporan pasien berdasarkan periode, jenis luka, atau petugas.
+- Rekap kunjungan pasien harian, mingguan, dan bulanan.
+- Export laporan ke PDF/Excel.
 
-************
-Installation
-************
+### 6. **Manajemen Data Referensi**
+- Data obat dan bahan medis.
+- Data jenis luka / kategori luka.
+- Data petugas dan jabatan.
+- Konfigurasi sistem dasar (logo instansi, nama unit, dsb).
 
-Please see the `installation section <https://codeigniter.com/userguide3/installation/index.html>`_
-of the CodeIgniter User Guide.
+### 7. **Keamanan & Backup**
+- Proteksi halaman berdasarkan sesi login.
+- Validasi input data.
+- Backup database manual melalui menu admin.
 
-*******
-License
-*******
+---
 
-Please see the `license
-agreement <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/license.rst>`_.
+## 🧩 Teknologi yang Digunakan
 
-*********
-Resources
-*********
+| Komponen | Keterangan |
+|-----------|-------------|
+| **Framework** | CodeIgniter 3 |
+| **Bahasa Pemrograman** | PHP 7.4+ |
+| **Database** | MySQL |
+| **Frontend** | Bootstrap 5, jQuery |
+| **Library Tambahan** | DataTables, SweetAlert, Chart.js |
+| **Server** | Apache |
 
--  `User Guide <https://codeigniter.com/docs>`_
--  `Contributing Guide <https://github.com/bcit-ci/CodeIgniter/blob/develop/contributing.md>`_
--  `Language File Translations <https://github.com/bcit-ci/codeigniter3-translations>`_
--  `Community Forums <http://forum.codeigniter.com/>`_
--  `Community Wiki <https://github.com/bcit-ci/CodeIgniter/wiki>`_
--  `Community Slack Channel <https://codeigniterchat.slack.com>`_
+---
 
-Report security issues to our `Security Panel <mailto:security@codeigniter.com>`_
-or via our `page on HackerOne <https://hackerone.com/codeigniter>`_, thank you.
+## ⚙️ Instalasi & Konfigurasi
 
-***************
-Acknowledgement
-***************
-
-The CodeIgniter team would like to thank EllisLab, all the
-contributors to the CodeIgniter project and you, the CodeIgniter user.
+### 1. **Clone Repository**
+```bash
+git clone https://github.com/khoirulanam5/siluka.git
+cd siluka
