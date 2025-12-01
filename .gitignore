@@ -31,8 +31,6 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /tests/tests/
 /tests/results/
 
-# 🔒 API / Secret config
-.env
-.env.*
+# 🔒 API 
 application/config/api.php
 *.sql
